@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ivoire Tech Services</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{blue:{DEFAULT:'#4B3CE8'},ora:'#F24E1E',mint:'#BCE8C5',lav:'#C8B6FF',peach:'#FFD1A9',ind:'#221633',pop:'#FF70B6'},fontFamily:{sans:['Plus Jakarta Sans','Inter','system-ui','sans-serif']}}}}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{background:#fff;color:#221633;margin:0;font-family:'Plus Jakarta Sans',Inter,system-ui,sans-serif;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.lift{transition:transform .25s,box-shadow .25s}.lift:hover{transform:translateY(-6px);box-shadow:0 18px 40px -12px rgba(34,22,51,.25)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState}=React;
+/* ===== CONFIG : remplacez le numéro et les photos ===== */
+const WA='2250171886189'; // format international sans + ni espaces
+const PHONE='+225 01 71 88 61 89';
+const U=(id)=>'https://images.unsplash.com/photo-'+id+'?auto=format&fit=crop&w=800&q=70';
+const IMG={
+ hero1:U('1518770660439-4636190af475'), hero2:U('1511707171634-5f897ff02aa9'),
+ hero3:U('1517336714731-489689fd1ca8'), hero4:U('1556909114-f6e7ad7d3136'),
+ phone:U('1597872200969-2b65d56bd16b'), laptop:U('1517336714731-489689fd1ca8'), gadget:U('1505740420928-5e560c06d30e'),
+ headphones:U('1505740420928-5e560c06d30e'), blender:U('1570222094114-d054a817e56b'),
+ powerbank:U('1609091839311-d5365f9ff1c5'), smartphone:U('1511707171634-5f897ff02aa9'), kitchen:U('1556909114-f6e7ad7d3136')
+};
+const ALT={hero1:'Réparation électronique',hero2:'Smartphone',hero3:'Ordinateur portable',hero4:'Cuisine moderne',phone:'Réparation de smartphone',laptop:'Ordinateur portable',gadget:'Accessoires et gadgets',headphones:'Casque sans fil',blender:'Blender multifonction',powerbank:'Batterie externe',smartphone:'Smartphone certifié',kitchen:'Ustensiles de cuisine'};
+const wa=(t)=>'https://wa.me/'+WA+'?text='+encodeURIComponent(t);
+const go=(t)=>window.open(wa(t),'_blank','noopener');
+
+const Pic=({k,cls='',q})=>{const [bad,setBad]=useState(false);
+ return IMG[k]&&!bad?<img src={IMG[k]} alt={ALT[k]} loading="lazy" onError={()=>setBad(true)} className={'w-full h-full object-cover '+cls}/>
+ :<div role="img" aria-label={ALT[k]} className="w-full h-full bg-gradient-to-br from-blue to-pop grid place-items-center text-white text-sm font-bold p-3 text-center">{q?null:ALT[k]}</div>};
+
+const products=[
+ {n:'Ordinateur portable reconditionné',p:'289 000',c:'Ordinateurs & Téléphones',k:'laptop',bg:'bg-mint'},
+ {n:'Casque sans fil à réduction de bruit',p:'45 000',c:'Électronique & Accessoires',k:'headphones',bg:'bg-peach'},
+ {n:'Blender intelligent multifonction',p:'32 500',c:'Ustensiles maison',k:'blender',bg:'bg-mint'},
+ {n:'Batterie externe charge rapide 20 000 mAh',p:'15 000',c:'Électronique & Accessoires',k:'powerbank',bg:'bg-peach'},
+ {n:'Smartphone certifié',p:'165 000',c:'Ordinateurs & Téléphones',k:'smartphone',bg:'bg-peach'},
+ {n:'Set cuisine moderne',p:'28 000',c:'Ustensiles maison',k:'kitchen',bg:'bg-mint'},
+];
+const tabs=['Tous les produits','Ordinateurs & Téléphones','Électronique & Accessoires','Ustensiles maison'];
+const links=[['Accueil','#home'],['Réparations','#services'],['Boutique','#shop'],['Ustensiles maison','#utensils'],['Suivi de réparation','#track']];
+const Icon=({d})=><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={d}/></svg>;
+
+function Modal({onClose,title,children}){
+ return(<div className="fixed inset-0 z-[60] grid place-items-center p-4 bg-ind/70 backdrop-blur-sm" onClick={onClose}>
+  <div role="dialog" aria-modal="true" aria-label={title} className="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-2xl" onClick={e=>e.stopPropagation()}>
+   <div className="flex justify-between items-start gap-4 mb-4"><h3 className="text-xl font-extrabold text-blue">{title}</h3><button onClick={onClose} aria-label="Fermer" className="text-2xl leading-none text-ind/50 hover:text-ora">×</button></div>
+   {children}
+  </div></div>);
+}
+
+function Booking({onClose}){
+ const [f,setF]=useState({nom:'',appareil:'',panne:''});
+ const set=k=>e=>setF({...f,[k]:e.target.value});
+ const send=()=>{go('Bonjour Ivoire Tech Services, je souhaite réserver une réparation.\nNom : '+(f.nom||'—')+'\nAppareil : '+(f.appareil||'—')+'\nProblème : '+(f.panne||'—')+'\nMerci de me confirmer un créneau.');onClose()};
+ const inp='w-full rounded-xl border-2 border-gray-200 focus:border-blue outline-none px-4 py-3 bg-transparent';
+ return(<Modal onClose={onClose} title="Réserver une réparation">
+  <div className="grid gap-3">
+   <input className={inp} placeholder="Votre nom" aria-label="Votre nom" value={f.nom} onChange={set('nom')}/>
+   <select className={inp} aria-label="Appareil" value={f.appareil} onChange={set('appareil')}><option value="">Type d'appareil</option><option>Smartphone</option><option>Tablette</option><option>Ordinateur portable</option><option>Ordinateur de bureau</option><option>Autre</option></select>
+   <textarea className={inp} rows="3" placeholder="Décrivez la panne (écran cassé, batterie, ne s'allume plus…)" aria-label="Problème" value={f.panne} onChange={set('panne')}></textarea>
+   <button onClick={send} className="bg-ora text-white font-bold py-3 rounded-full hover:brightness-110">Envoyer sur WhatsApp</button>
+  </div></Modal>);
+}
+
+function Nav({openBook}){
+ const [open,setOpen]=useState(false);
+ return(<header className="sticky top-0 z-50 bg-ind/90 backdrop-blur-md text-white">
+  <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+   <a href="#home" className="font-extrabold text-lg flex items-center gap-2"><span className="h-8 px-2 rounded-xl bg-blue grid place-items-center text-xs tracking-wide">ITS</span>Ivoire Tech Services</a>
+   <nav className="hidden lg:flex gap-6 text-sm font-semibold">{links.map(l=><a key={l[0]} href={l[1]} className="hover:text-lav transition">{l[0]}</a>)}</nav>
+   <div className="flex items-center gap-3">
+    <a href="#shop" aria-label="Rechercher" className="hover:text-lav"><Icon d="M21 21l-4.3-4.3M11 18a7 7 0 100-14 7 7 0 000 14z"/></a>
+    <button aria-label="Commander sur WhatsApp" onClick={()=>go('Bonjour, je souhaite passer une commande.')} className="hover:text-lav"><Icon d="M6 6h15l-1.5 9h-12zM6 6L5 2H2M9 20h.01M18 20h.01"/></button>
+    <button aria-label="Discuter sur WhatsApp" onClick={()=>go('Bonjour Ivoire Tech Services, j\'ai une question.')} className="hover:text-mint"><Icon d="M3 21l1.6-4.7A8.5 8.5 0 1112 20.5a8.4 8.4 0 01-4.2-1.1L3 21z"/></button>
+    <button onClick={openBook} className="hidden sm:block bg-ora text-white font-bold text-sm px-4 py-2 rounded-full hover:brightness-110">Réserver une réparation</button>
+    <button className="lg:hidden" aria-label="Menu" onClick={()=>setOpen(!open)}><Icon d="M3 6h18M3 12h18M3 18h18"/></button>
+   </div>
+  </div>
+  {open&&<div className="lg:hidden px-4 pb-4 grid gap-3 text-sm font-semibold">{links.map(l=><a key={l[0]} href={l[1]} onClick={()=>setOpen(false)}>{l[0]}</a>)}<button onClick={()=>{setOpen(false);openBook()}} className="bg-ora py-2 rounded-full">Réserver une réparation</button></div>}
+ </header>);
+}
+
+function Hero({openBook}){
+ return(<section id="home" className="bg-ind text-white relative overflow-hidden">
+  <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue/50 blur-3xl"></div>
+  <div className="max-w-7xl mx-auto px-4 py-16 lg:py-24 grid lg:grid-cols-2 gap-12 items-center relative">
+   <div>
+    <span className="inline-block bg-white/10 text-lav text-xs font-bold px-3 py-1 rounded-full mb-5">Vente tech premium · Réparations expertes · Maison connectée</span>
+    <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight">Votre partenaire de confiance pour la <span className="text-pop">réparation tech</span> et le style de vie moderne</h1>
+    <p className="mt-5 text-lg text-white/75 max-w-xl">Réparation rapide d'ordinateurs et de téléphones, gadgets certifiés et équipements maison intelligents, tout au même endroit à Abidjan.</p>
+    <div className="mt-8 flex flex-wrap gap-3">
+     <a href="#shop" className="bg-blue hover:bg-white hover:text-ind transition font-bold px-6 py-3 rounded-full">Découvrir la boutique</a>
+     <button onClick={openBook} className="border-2 border-ora text-ora hover:bg-ora hover:text-white transition font-bold px-6 py-3 rounded-full">Réparation express</button>
+    </div>
+    <p className="mt-5 text-sm text-white/60">Assistance WhatsApp et téléphone : {PHONE}</p>
+   </div>
+   <div className="grid grid-cols-2 gap-4">
+    {['hero1','hero4','hero3','hero2'].map(k=><div key={k} className="lift relative rounded-2xl overflow-hidden border border-white/20 h-40 sm:h-52 lg:h-60"><Pic k={k} q/><div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-ind/90 to-transparent text-sm font-bold">{ALT[k]}</div></div>)}
+   </div>
+  </div>
+ </section>);
+}
+
+function Stats(){
+ const s=['⚡ Réparation express en 24-48 h','🛡️ Pièces d\'origine 100 % garanties','🚚 Livraison rapide dans Abidjan','⭐ Satisfaction client 4,9/5'];
+ return(<section className="bg-blue text-white"><div className="max-w-7xl mx-auto px-4 py-5 grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm font-bold text-center">{s.map(x=><div key={x}>{x}</div>)}</div></section>);
+}
+
+function Services({openBook}){
+ const c=[{t:'Réparation smartphones & tablettes',d:'Remplacement d\'écran, batterie neuve, traitement après dégât des eaux et micro-soudure sur carte mère.',k:'phone',b:'Populaire'},
+ {t:'Diagnostic ordinateurs & PC',d:'Dépannage matériel, réinstallation du système, réparation clavier/écran et upgrade SSD pour plus de vitesse.',k:'hero1'},
+ {t:'Vente de gadgets & accessoires',d:'Chargeurs d\'origine, écouteurs sans fil, montres connectées et accessoires de protection.',k:'gadget'}];
+ return(<section id="services" className="max-w-7xl mx-auto px-4 py-20">
+  <h2 className="text-3xl sm:text-4xl font-extrabold text-blue text-center">Services experts en informatique et réparation</h2>
+  <div className="mt-12 grid md:grid-cols-3 gap-6">{c.map(x=>
+   <div key={x.t} className="lift relative bg-white rounded-2xl border-2 border-gray-100 hover:border-lav overflow-hidden flex flex-col">
+    <div className="h-44">{x.b&&<span className="absolute top-3 right-3 z-10 bg-pop text-ind text-xs font-extrabold px-3 py-1 rounded-full">{x.b}</span>}<Pic k={x.k}/></div>
+    <div className="p-6 flex-1 flex flex-col"><h3 className="text-xl font-extrabold text-blue">{x.t}</h3><p className="mt-2 text-ind/70 flex-1">{x.d}</p>
+     <button onClick={openBook} className="mt-4 self-start text-ora font-bold hover:underline">Réserver →</button></div>
+   </div>)}</div>
+ </section>);
+}
+
+function Shop({cat,limit,title}){
+ const [tab,setTab]=useState(cat||tabs[0]);
+ const all=products.filter(p=>tab===tabs[0]||p.c===tab);const list=limit?all.slice(0,limit):all;
+ return(<section id="shop" className="bg-ind/[.03] py-20"><div className="max-w-7xl mx-auto px-4">
+  <div className="text-center"><span className="bg-pop text-ind text-xs font-extrabold px-3 py-1 rounded-full">VENTES FLASH</span></div>
+  <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold text-center">{title||'Boutique tech et maison intelligente'}</h2>
+  {!cat&&!limit&&<div className="mt-8 flex gap-2 justify-center flex-wrap">{tabs.map(t=>
+   <button key={t} onClick={()=>setTab(t)} className={'px-4 py-2 rounded-full text-sm font-bold transition '+(tab===t?'bg-blue text-white':'bg-white text-ind hover:bg-lav')}>{t}</button>)}</div>}
+  <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{list.map(p=>
+   <div key={p.n} className={'lift rounded-2xl p-4 '+p.bg}>
+    <div className="h-48 rounded-xl overflow-hidden"><Pic k={p.k}/></div>
+    <div className="px-2 pb-2"><div className="text-xs font-bold opacity-60 mt-3">{p.c}</div>
+    <h3 className="font-extrabold text-lg">{p.n}</h3>
+    <div className="mt-4 flex items-center justify-between gap-2"><span className="text-xl font-extrabold text-blue">{p.p} FCFA</span>
+     <button onClick={()=>go('Bonjour Ivoire Tech Services, je souhaite commander :\n• '+p.n+'\n• Prix : '+p.p+' FCFA\nEst-il disponible ? Merci.')} className="bg-ind text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-ora transition">Commander</button></div></div>
+   </div>)}</div>
+ {limit&&<div className="text-center mt-10"><a href="#shop" className="inline-block bg-blue text-white font-bold px-6 py-3 rounded-full hover:bg-ind">Voir toute la boutique →</a></div>}
+ </div></section>);
+}
+
+const STEPS=['Appareil reçu','En diagnostic','Pièces remplacées','Prêt à retirer'];
+const NOTES=['Votre appareil est enregistré dans notre atelier.','Nos techniciens identifient la panne.','Les pièces ont été remplacées, tests en cours.','Votre appareil est prêt, passez le récupérer !'];
+function Tracker(){
+ const [id,setId]=useState('');const [err,setErr]=useState(false);const [res,setRes]=useState(null);
+ const check=()=>{const v=id.trim().toUpperCase();const m=v.match(/^ITS-(\d{3,4})$/);
+  if(!m){setErr(true);return}setErr(false);
+  const n=+m[1];const step=n===101?1:n===102?2:n===103?3:n%4;setRes({v,step})};
+ return(<section id="track" className="max-w-3xl mx-auto px-4 py-20">
+  <div className="rounded-2xl bg-white border-2 border-lav p-8 shadow-xl">
+   <h2 className="text-2xl sm:text-3xl font-extrabold text-blue">Suivez votre réparation en direct</h2>
+   <div className="mt-6 flex flex-col sm:flex-row gap-3">
+    <input value={id} onChange={e=>setId(e.target.value)} onKeyDown={e=>e.key==='Enter'&&check()} placeholder="Numéro de ticket (ex. ITS-101)" aria-label="Numéro de ticket" className="flex-1 rounded-full border-2 border-gray-200 focus:border-blue outline-none px-5 py-3"/>
+    <button onClick={check} className="bg-ora text-white font-bold px-6 py-3 rounded-full hover:brightness-110">Vérifier le statut</button>
+   </div>
+   {err&&<p className="mt-4 text-sm text-ora font-semibold">Entrez un numéro valide, par exemple ITS-101.</p>}
+   <p className="mt-4 text-xs text-ind/50">Essayez ITS-101, ITS-102 ou ITS-103 (démonstration).</p>
+  </div>
+  {res&&<Modal onClose={()=>setRes(null)} title={'Ticket '+res.v}>
+   <div className="rounded-xl bg-lav/40 p-4 mb-5"><div className="text-xs font-bold text-blue">STATUT ACTUEL</div><div className="text-xl font-extrabold">{STEPS[res.step]}</div><p className="text-sm text-ind/70 mt-1">{NOTES[res.step]}</p></div>
+   <ol className="grid gap-3">{STEPS.map((s,i)=><li key={s} className="flex items-center gap-3">
+    <span className={'w-7 h-7 rounded-full grid place-items-center text-xs font-extrabold '+(i<=res.step?'bg-blue text-white':'bg-gray-200 text-gray-500')}>{i<res.step?'✓':i+1}</span>
+    <span className={'font-semibold '+(i<=res.step?'text-ind':'text-gray-400')}>{s}</span></li>)}</ol>
+   <button onClick={()=>go('Bonjour, je voudrais des nouvelles de ma réparation, ticket '+res.v+'.')} className="mt-6 w-full bg-ora text-white font-bold py-3 rounded-full hover:brightness-110">Contacter l'atelier sur WhatsApp</button>
+   <p className="text-xs text-ind/50 mt-3 text-center">Données de démonstration.</p>
+  </Modal>}
+ </section>);
+}
+
+function Testimonials(){
+ const t=[['Awa K., Cocody','Écran de téléphone remplacé le jour même. Prix honnête et service au top.'],['Jean-Marc D., Marcory','J\'ai acheté un portable reconditionné qui marche parfaitement. Livraison rapide.'],['Fatou S., Koumassi','Blender et batterie externe trouvés en une seule visite. Très pratique !']];
+ return(<section className="bg-lav/30 py-20"><div className="max-w-7xl mx-auto px-4">
+  <h2 className="text-3xl sm:text-4xl font-extrabold text-center">Ce que disent nos clients</h2>
+  <div className="mt-10 grid md:grid-cols-3 gap-6">{t.map(x=><figure key={x[0]} className="lift bg-white rounded-2xl p-6 border-t-4 border-lav">
+   <div className="text-pop text-xl">★★★★★</div><blockquote className="mt-3 text-ind/80">« {x[1]} »</blockquote><figcaption className="mt-4 font-extrabold text-blue">{x[0]}</figcaption></figure>)}</div>
+  <p className="text-center text-xs text-ind/50 mt-6">Témoignages d'exemple, à remplacer par de vrais avis clients.</p>
+ </div></section>);
+}
+
+function Footer(){
+ return(<footer className="bg-ind text-white/80"><div className="max-w-7xl mx-auto px-4 py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-8 text-sm">
+  <div><div className="font-extrabold text-white text-lg flex items-center gap-2"><span className="h-8 px-2 rounded-xl bg-blue grid place-items-center text-xs tracking-wide">ITS</span>Ivoire Tech Services</div><p className="mt-3">Vente tech premium, réparations expertes et équipements pour une maison intelligente.</p></div>
+  <div><div className="font-bold text-white mb-3">Liens rapides</div><ul className="space-y-2"><li><a href="#services">Réparation téléphones & tablettes</a></li><li><a href="#services">Diagnostic ordinateurs</a></li><li><a href="#shop">Boutique gadgets</a></li><li><a href="#track">Suivi de réparation</a></li></ul></div>
+  <div><div className="font-bold text-white mb-3">Contact</div><ul className="space-y-2"><li>📞 {PHONE}</li><li><button onClick={()=>go('Bonjour Ivoire Tech Services !')} className="underline hover:text-mint">💬 WhatsApp : {PHONE}</button></li><li>📍 Abidjan, Côte d'Ivoire</li><li>🕘 Lun–Sam, 8h00–19h00</li></ul></div>
+  <div><div className="font-bold text-white mb-3">Suivez-nous</div><div className="flex gap-3 flex-wrap">{['Facebook','Instagram','TikTok'].map(s=><a key={s} href="#" className="px-3 py-1 rounded-full bg-white/10 hover:bg-pop hover:text-ind transition">{s}</a>)}</div></div>
+ </div><div className="border-t border-white/10 py-5 text-center text-xs">© 2026 Ivoire Tech Services. Tous droits réservés.</div></footer>);
+}
+
+const PageHead=({t,s})=><section className="bg-ind text-white"><div className="max-w-7xl mx-auto px-4 py-12"><h1 className="text-3xl sm:text-4xl font-extrabold">{t}</h1><p className="mt-2 text-white/70 max-w-2xl">{s}</p></div></section>;
+function App(){
+ const [book,setBook]=useState(false);const openBook=()=>setBook(true);
+ const get=()=>location.hash.replace('#','')||'home';
+ const [r,setR]=useState(get());
+ React.useEffect(()=>{const f=()=>{setR(get());window.scrollTo({top:0,behavior:'instant'})};window.addEventListener('hashchange',f);return()=>window.removeEventListener('hashchange',f)},[]);
+ const pages={
+  home:<><Hero openBook={openBook}/><Stats/><Services openBook={openBook}/><Shop limit={3} title="Nos produits à la une"/><Testimonials/></>,
+  services:<><PageHead t="Réparations" s="Smartphones, tablettes, ordinateurs : diagnostic, pièces d'origine et réparation rapide à Abidjan."/><Services openBook={openBook}/><Stats/></>,
+  shop:<><PageHead t="Boutique" s="Ordinateurs, téléphones, accessoires et ustensiles pour la maison, disponibles sur commande WhatsApp."/><Shop/></>,
+  utensils:<><PageHead t="Ustensiles maison" s="Équipements de cuisine et appareils pratiques pour une maison moderne."/><Shop cat="Ustensiles maison" title="Nos ustensiles maison"/></>,
+  track:<><PageHead t="Suivi de réparation" s="Saisissez votre numéro de ticket pour connaître l'état de votre appareil."/><Tracker/></>
+ };
+ return(<><Nav openBook={openBook}/>{pages[r]||pages.home}<Footer/>{book&&<Booking onClose={()=>setBook(false)}/>}</>);
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
